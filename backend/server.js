@@ -8,28 +8,57 @@ app.use(cors());
 app.use(express.json());
 
 // Mock In-Memory Database
-const users = {}; // map of phone -> user details
+const users = {
+  // Pre-seed the reviewer account so they can log in immediately
+  'hire-me@anshumat.org': {
+    id: 'reviewer_123',
+    email: 'hire-me@anshumat.org',
+    password: 'HireMe@2025!',
+    profileComplete: false
+  }
+};
 const applications = {}; // map of appId -> { userId, status, data, lastSaved }
 
-// 1. Mock Authentication (Email/Password)
+// 1. Mock Authentication: Sign Up
+app.post('/api/auth/signup', (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
+  
+  if (users[email]) {
+    return res.status(409).json({ error: 'An account with this email already exists' });
+  }
+
+  // Create mock user
+  users[email] = { id: `user_${Date.now()}`, email, password, profileComplete: false };
+  
+  // Simulate network delay
+  setTimeout(() => {
+    res.status(201).json({ 
+      token: `fake_token_${users[email].id}`, 
+      user: { id: users[email].id, email, profileComplete: false } 
+    });
+  }, 1000);
+});
+
+// 2. Mock Authentication: Login
 app.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
   
-  if (email === 'hire-me@anshumat.org' && password !== 'HireMe@2025!') {
-    return res.status(401).json({ error: 'Invalid reviewer password' });
+  const user = users[email];
+  if (!user) {
+    return res.status(404).json({ error: 'No account found with this email' });
   }
 
-  // Create mock user if doesn't exist
-  if (!users[email]) {
-    users[email] = { id: `user_${Date.now()}`, email, profileComplete: false };
+  if (user.password !== password) {
+    return res.status(401).json({ error: 'Incorrect password' });
   }
   
   // Simulate network delay
   setTimeout(() => {
     res.json({ 
-      token: `fake_token_${users[email].id}`, 
-      user: users[email] 
+      token: `fake_token_${user.id}`, 
+      user: { id: user.id, email: user.email, name: user.name, dob: user.dob, city: user.city, profileComplete: user.profileComplete } 
     });
   }, 1000);
 });

@@ -17,7 +17,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    // Simulate API call
     try {
       const res = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
@@ -25,13 +24,32 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
-      if (data.user) {
+      if (res.ok && data.user) {
         setUser(data.user);
         localStorage.setItem('passport_user', JSON.stringify(data.user));
       }
       return data;
     } catch (err) {
       console.error("Login fetch error:", err);
+      return { error: 'Could not connect to backend server. Make sure it is running on port 5000.' };
+    }
+  };
+
+  const signup = async (email, password) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.user) {
+        setUser(data.user);
+        localStorage.setItem('passport_user', JSON.stringify(data.user));
+      }
+      return data;
+    } catch (err) {
+      console.error("Signup fetch error:", err);
       return { error: 'Could not connect to backend server. Make sure it is running on port 5000.' };
     }
   };
@@ -56,7 +74,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateProfile, loading }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, updateProfile, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );
