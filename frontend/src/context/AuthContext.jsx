@@ -16,13 +16,13 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (phone) => {
+  const login = async (email, password) => {
     // Simulate API call
     try {
       const res = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone })
+        body: JSON.stringify({ email, password })
       });
       const data = await res.json();
       if (data.user) {

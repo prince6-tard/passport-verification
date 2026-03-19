@@ -11,21 +11,25 @@ app.use(express.json());
 const users = {}; // map of phone -> user details
 const applications = {}; // map of appId -> { userId, status, data, lastSaved }
 
-// 1. Mock Authentication (OTP)
+// 1. Mock Authentication (Email/Password)
 app.post('/api/auth/login', (req, res) => {
-  const { phone } = req.body;
-  if (!phone) return res.status(400).json({ error: 'Phone number is required' });
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
   
+  if (email === 'hire-me@anshumat.org' && password !== 'HireMe@2025!') {
+    return res.status(401).json({ error: 'Invalid reviewer password' });
+  }
+
   // Create mock user if doesn't exist
-  if (!users[phone]) {
-    users[phone] = { id: `user_${Date.now()}`, phone, profileComplete: false };
+  if (!users[email]) {
+    users[email] = { id: `user_${Date.now()}`, email, profileComplete: false };
   }
   
-  // Simulate OTP sent & auto-verified
+  // Simulate network delay
   setTimeout(() => {
     res.json({ 
-      token: `fake_token_${users[phone].id}`, 
-      user: users[phone] 
+      token: `fake_token_${users[email].id}`, 
+      user: users[email] 
     });
   }, 1000);
 });
