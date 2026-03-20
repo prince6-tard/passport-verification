@@ -19,15 +19,18 @@ const Login = () => {
     e.preventDefault();
     setErrorMsg('');
     
-    if (!isLogin && password !== confirmPassword) {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+    
+    if (!isLogin && cleanPassword !== confirmPassword.trim()) {
       setErrorMsg('Passwords do not match');
       return;
     }
 
-    if (email && password) {
+    if (cleanEmail && cleanPassword) {
       setLoading(true);
       
-      const res = isLogin ? await login(email, password) : await signup(email, password);
+      const res = isLogin ? await login(cleanEmail, cleanPassword) : await signup(cleanEmail, cleanPassword);
       
       setLoading(false);
       
